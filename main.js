@@ -64,13 +64,13 @@ socket.on('joined', ({ player, gameStarted: serverGameStarted, roundEndTime }) =
 document.querySelectorAll('.tab-link').forEach(link => {
     link.addEventListener('click', () => {
         document.querySelectorAll('.tab-link').forEach(l => {
-            l.classList.remove('active', 'bg-primary/10', 'text-primary');
-            l.classList.add('text-slate-500');
+            l.classList.remove('active', 'bg-primary', 'text-white');
+            l.classList.add('text-slate-400');
         });
         document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
 
-        link.classList.add('active', 'bg-primary/10', 'text-primary');
-        link.classList.remove('text-slate-500');
+        link.classList.add('active', 'bg-primary', 'text-white');
+        link.classList.remove('text-slate-400');
         document.getElementById(link.dataset.tab).classList.remove('hidden');
     });
 });
