@@ -234,7 +234,9 @@ io.on('connection', (socket) => {
                 market.splice(listingIndex, 1);
             }
 
-            tradeLogs.push({ buyer: buyer.name, seller: seller ? seller.name : 'Unknown', item: listing.item, quantity, price: listing.price, time: Date.now() });
+            const tradeData = { buyer: buyer.name, seller: seller ? seller.name : 'Unknown', item: listing.item, quantity, price: listing.price, time: Date.now() };
+            tradeLogs.push(tradeData);
+            io.emit('tradeOccurred', tradeData);
             socket.emit('notification', { message: `Bought ${quantity} ${listing.item}` });
             io.emit('stateUpdate', { players, market });
         } else {
@@ -306,7 +308,13 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 3000;
-if (process.env.NODE_ENV !== 'production') {
+// Support both local development and Vercel/Production environments
+if (!process.env.VERCEL && process.env.NODE_ENV !== 'production') {
+    server.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+} else if (!process.env.VERCEL) {
+    // Fallback for other production environments that aren't Vercel
     server.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
     });

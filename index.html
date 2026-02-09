@@ -1,205 +1,609 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="dark" lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EcoSurvival - Economic Behavior Game</title>
-  <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>EcoSurvival - Join the Economy</title>
+  <link href="https://fonts.googleapis.com" rel="preconnect" />
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Orbitron:wght@400;700;900&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&family=Material+Icons&display=swap"
+    rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#3b82f6",
+            secondary: "#a855f7",
+            "background-light": "#f1f5f9",
+            "background-dark": "#020617",
+            "card-light": "rgba(255, 255, 255, 0.7)",
+            "card-dark": "rgba(15, 23, 42, 0.6)",
+            "panel-dark": "#1e293b",
+            "terminal-green": "#10b981",
+            "danger-red": "#ef4444"
+          },
+          fontFamily: {
+            display: ["Orbitron", "sans-serif"],
+            sans: ["Plus Jakarta Sans", "sans-serif"],
+            mono: ["JetBrains Mono", "monospace"],
+          },
+          borderRadius: {
+            DEFAULT: "12px",
+          },
+          boxShadow: {
+            'neon-blue': '0 0 20px rgba(59, 130, 246, 0.4)',
+            'neon-purple': '0 0 20px rgba(168, 85, 247, 0.4)',
+          }
+        },
+      },
+    };
+  </script>
+  <style>
+    .glass {
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .particle {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      opacity: 0.3;
+      pointer-events: none;
+      animation: float 20s infinite linear;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(0px) rotate(0deg);
+        opacity: 0;
+      }
+
+      50% {
+        opacity: 0.5;
+      }
+
+      100% {
+        transform: translateY(-1000px) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    .glow-text {
+      text-shadow: 0 0 15px rgba(59, 130, 246, 0.6);
+    }
+
+    .card-hover:hover {
+      transform: translateY(-4px);
+      border-color: #3b82f6;
+      box-shadow: 0 0 25px rgba(59, 130, 246, 0.2);
+    }
+
+    .custom-radio:checked+label {
+      border-color: #3b82f6;
+      background: rgba(59, 130, 246, 0.1);
+      box-shadow: inset 0 0 10px rgba(59, 130, 246, 0.2);
+    }
+
+    .gauge-ring {
+      transition: stroke-dashoffset 0.5s ease;
+    }
+
+    .terminal-scroll::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .terminal-scroll::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .terminal-scroll::-webkit-scrollbar-thumb {
+      background: rgba(16, 185, 129, 0.3);
+      border-radius: 10px;
+    }
+
+    .animate-marquee {
+      display: inline-block;
+      white-space: nowrap;
+      animation: marquee 30s linear infinite;
+    }
+
+    @keyframes marquee {
+      0% {
+        transform: translateX(100%);
+      }
+
+      100% {
+        transform: translateX(-100%);
+      }
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
 </head>
 
-<body>
-  <div id="login-screen" class="screen">
-    <div class="glass-card login-card">
-      <h1>EcoSurvival</h1>
-      <p>Master the economy or perish.</p>
-      <form id="login-form">
-        <div class="input-group">
-          <label for="player-name">Name</label>
-          <input type="text" id="player-name" required placeholder="Enter your name...">
-        </div>
-        <div class="input-group">
-          <label>Choose Your Business</label>
-          <div class="business-selection">
-            <label class="business-option">
-              <input type="radio" name="businessType" value="water_vendor" checked>
-              <span class="option-card">
-                <h3>Water Vendor</h3>
-                <p>Produces: Water Bottle</p>
-              </span>
-            </label>
-            <label class="business-option">
-              <input type="radio" name="businessType" value="hotdog_vendor">
-              <span class="option-card">
-                <h3>Hotdog Vendor</h3>
-                <p>Produces: Hotdog</p>
-              </span>
-            </label>
-            <label class="business-option">
-              <input type="radio" name="businessType" value="chicken_rice_vendor">
-              <span class="option-card">
-                <h3>Chicken Rice Vendor</h3>
-                <p>Produces: Chicken Rice</p>
-              </span>
-            </label>
-            <label class="business-option">
-              <input type="radio" name="businessType" value="medicine_vendor">
-              <span class="option-card">
-                <h3>Medicine Vendor</h3>
-                <p>Produces: Medicine</p>
-              </span>
-            </label>
+<body class="bg-background-dark font-sans text-slate-100 min-h-screen overflow-x-hidden">
+  <div class="fixed inset-0 overflow-hidden pointer-events-none" id="particles"></div>
+
+  <!-- Login Screen -->
+  <div id="login-screen" class="min-h-screen flex items-center justify-center p-6">
+    <main
+      class="relative z-10 w-full max-w-2xl bg-white/5 backdrop-blur-xl border border-white/10 p-8 md:p-12 rounded-[2rem] shadow-2xl">
+      <header class="text-center mb-12">
+        <h1
+          class="font-display text-5xl md:text-6xl font-black mb-4 tracking-tighter bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-500 bg-clip-text text-transparent glow-text">
+          ECOSURVIVAL
+        </h1>
+        <p class="text-slate-400 text-lg font-medium tracking-wide uppercase italic">
+          Master the economy or perish.
+        </p>
+      </header>
+      <form id="login-form" class="space-y-8">
+        <div class="space-y-3">
+          <label class="block text-sm font-bold text-slate-400 uppercase tracking-widest ml-1" for="player-name">
+            Enter Survivor Name
+          </label>
+          <div class="relative group">
+            <span
+              class="material-symbols-rounded absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary transition-colors">person</span>
+            <input
+              class="w-full bg-slate-900/50 border-2 border-slate-700 focus:border-primary focus:ring-0 rounded-2xl py-4 pl-12 pr-4 text-lg font-semibold transition-all outline-none"
+              id="player-name" required placeholder="e.g. Satoshi_Survivor" type="text" />
           </div>
         </div>
-        <button type="submit" class="btn-primary">Join Game</button>
+        <div class="space-y-4">
+          <label class="block text-sm font-bold text-slate-400 uppercase tracking-widest ml-1">
+            Choose Your Venture
+          </label>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="relative">
+              <input checked class="hidden custom-radio" id="water_vendor" name="businessType" type="radio"
+                value="water_vendor" />
+              <label
+                class="flex items-center p-5 rounded-2xl border-2 border-slate-700 cursor-pointer transition-all card-hover group h-full"
+                for="water_vendor">
+                <div
+                  class="w-14 h-14 rounded-xl bg-blue-500/10 flex items-center justify-center mr-4 shrink-0 border border-blue-500/20">
+                  <span class="material-symbols-rounded text-blue-400 text-3xl">water_drop</span>
+                </div>
+                <div>
+                  <h3 class="font-bold text-lg text-white">Water Vendor</h3>
+                  <p class="text-sm text-slate-500">Essential Life Supply</p>
+                </div>
+              </label>
+            </div>
+            <div class="relative">
+              <input class="hidden custom-radio" id="hotdog_vendor" name="businessType" type="radio"
+                value="hotdog_vendor" />
+              <label
+                class="flex items-center p-5 rounded-2xl border-2 border-slate-700 cursor-pointer transition-all card-hover group h-full"
+                for="hotdog_vendor">
+                <div
+                  class="w-14 h-14 rounded-xl bg-orange-500/10 flex items-center justify-center mr-4 shrink-0 border border-orange-500/20">
+                  <span class="material-symbols-rounded text-orange-400 text-3xl">fastfood</span>
+                </div>
+                <div>
+                  <h3 class="font-bold text-lg text-white">Hotdog Vendor</h3>
+                  <p class="text-sm text-slate-500">Quick Street Bites</p>
+                </div>
+              </label>
+            </div>
+            <div class="relative">
+              <input class="hidden custom-radio" id="chicken_rice_vendor" name="businessType" type="radio"
+                value="chicken_rice_vendor" />
+              <label
+                class="flex items-center p-5 rounded-2xl border-2 border-slate-700 cursor-pointer transition-all card-hover group h-full"
+                for="chicken_rice_vendor">
+                <div
+                  class="w-14 h-14 rounded-xl bg-emerald-500/10 flex items-center justify-center mr-4 shrink-0 border border-emerald-500/20">
+                  <span class="material-symbols-rounded text-emerald-400 text-3xl">restaurant</span>
+                </div>
+                <div>
+                  <h3 class="font-bold text-lg text-white">Chicken Rice</h3>
+                  <p class="text-sm text-slate-500">Hearty Daily Meals</p>
+                </div>
+              </label>
+            </div>
+            <div class="relative">
+              <input class="hidden custom-radio" id="medicine_vendor" name="businessType" type="radio"
+                value="medicine_vendor" />
+              <label
+                class="flex items-center p-5 rounded-2xl border-2 border-slate-700 cursor-pointer transition-all card-hover group h-full"
+                for="medicine_vendor">
+                <div
+                  class="w-14 h-14 rounded-xl bg-red-500/10 flex items-center justify-center mr-4 shrink-0 border border-red-500/20">
+                  <span class="material-symbols-rounded text-red-400 text-3xl">medication</span>
+                </div>
+                <div>
+                  <h3 class="font-bold text-lg text-white">Medicine Shop</h3>
+                  <p class="text-sm text-slate-500">Vital Health Services</p>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+        <button
+          class="group relative w-full overflow-hidden rounded-2xl bg-gradient-to-r from-primary to-secondary p-[2px] transition-all hover:scale-[1.02] active:scale-[0.98] shadow-neon-blue"
+          type="submit">
+          <div
+            class="relative flex items-center justify-center space-x-2 bg-slate-900/20 py-4 rounded-[calc(1rem-2px)] backdrop-blur-sm group-hover:bg-transparent transition-colors">
+            <span class="text-xl font-bold text-white tracking-widest uppercase italic">Start Surviving</span>
+            <span class="material-symbols-rounded text-white group-hover:translate-x-1 transition-transform">bolt</span>
+          </div>
+        </button>
       </form>
-    </div>
+    </main>
   </div>
 
-  <div id="game-screen" class="screen hidden">
-    <header>
-      <div class="logo">EcoSurvival</div>
-      <div id="round-timer" class="timer">Round starts soon...</div>
-      <div class="user-info">
-        <span id="header-money">$0</span>
-        <span id="player-status-badge" class="badge">ALIVE</span>
+  <!-- Game Screen -->
+  <div id="game-screen" class="hidden min-h-screen flex flex-col">
+    <!-- Navbar -->
+    <nav class="h-16 border-b border-slate-800 glass px-6 flex items-center justify-between z-50">
+      <div class="flex items-center gap-8">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-lg shadow-primary/20">
+            <span class="material-symbols-rounded text-white text-xl">eco</span>
+          </div>
+          <span
+            class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">EcoSurvival</span>
+        </div>
+        <div class="hidden md:flex gap-1">
+          <button class="tab-link active px-4 py-1.5 rounded-full bg-primary/10 text-primary font-semibold text-sm"
+            data-tab="dashboard">Dashboard</button>
+          <button
+            class="tab-link px-4 py-1.5 rounded-full text-slate-500 hover:bg-slate-800 transition-all font-medium text-sm"
+            data-tab="market">Market</button>
+          <button id="admin-tab-link"
+            class="tab-link hidden px-4 py-1.5 rounded-full text-slate-500 hover:bg-slate-800 transition-all font-medium text-sm"
+            data-tab="admin">Admin HQ</button>
+        </div>
       </div>
-    </header>
-
-    <nav class="tabs">
-      <button class="tab-link active" data-tab="dashboard">Dashboard</button>
-      <button class="tab-link" data-tab="market">Market</button>
-      <button class="tab-link hidden" id="admin-tab-link" data-tab="admin">Admin</button>
+      <div class="flex items-center gap-6">
+        <div id="round-timer" class="flex items-center gap-2 text-pink-500 font-bold animate-pulse">
+          <span class="material-symbols-rounded text-sm">timer</span>
+          <span class="text-sm tracking-widest uppercase">Round starting...</span>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center gap-2">
+            <span class="material-symbols-rounded text-emerald-500">payments</span>
+            <span id="header-money" class="font-bold text-emerald-500 text-lg">$0</span>
+          </div>
+          <div
+            class="px-3 py-1.5 bg-emerald-500 rounded-full flex items-center gap-1.5 shadow-lg shadow-emerald-500/20">
+            <span id="player-status-badge"></span>
+            <span class="text-[10px] font-black uppercase text-white tracking-widest"
+              id="player-status-text">Alive</span>
+          </div>
+        </div>
+      </div>
     </nav>
 
-    <main id="tab-content">
-      <!-- Dashboard Tab (Merged) -->
-      <section id="dashboard" class="tab-pane active">
-        <div class="dashboard-grid">
-          <!-- Left Column: Business & Shop -->
-          <div class="side-col">
-            <div class="glass-card">
-              <h3>My Business</h3>
-              <div id="recipe-info" class="recipe-card"></div>
-              <button id="produce-btn" class="btn-primary">Produce (Cost $1)</button>
+    <!-- Content Area -->
+    <main id="tab-content" class="flex-1 flex overflow-hidden">
+      <!-- Dashboard Tab -->
+      <section id="dashboard" class="tab-pane active flex flex-1 p-4 gap-4 overflow-hidden">
+        <!-- Sidebar: Business & Shop -->
+        <aside class="w-80 flex flex-col gap-4 overflow-y-auto pr-2 terminal-scroll">
+          <section class="glass bg-card-dark rounded-2xl p-5 border border-white/10">
+            <div class="flex justify-between items-start mb-4">
+              <div>
+                <h2 class="text-xs font-bold text-slate-500 uppercase tracking-widest">Active Business</h2>
+                <h3 id="business-display-name" class="text-xl font-extrabold text-white">Loading...</h3>
+              </div>
+              <div class="p-2 bg-blue-500/20 rounded-lg">
+                <span id="business-icon" class="material-symbols-rounded text-primary">work</span>
+              </div>
             </div>
-            <div class="glass-card">
-              <h3>Raw Material Shop</h3>
-              <div class="shop-grid-compact" id="system-shop-items"></div>
+            <div id="recipe-info" class="mb-4"></div>
+            <button id="produce-btn"
+              class="w-full py-3.5 rounded-xl bg-gradient-to-r from-primary to-blue-600 text-white font-bold text-sm shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all">
+              Produce (Cost $1)
+            </button>
+          </section>
+
+          <section class="glass bg-card-dark rounded-2xl p-5 border border-white/10 flex-1">
+            <h2 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Raw Material Shop</h2>
+            <div id="system-shop-items" class="grid grid-cols-2 gap-3">
+              <!-- Shop items injected here -->
+            </div>
+          </section>
+        </aside>
+
+        <!-- Main Dashboard: Inventory -->
+        <div class="flex-1 glass bg-card-dark rounded-2xl p-6 border border-white/10 overflow-y-auto terminal-scroll">
+          <div class="flex items-center justify-between mb-8">
+            <div>
+              <h2 class="text-2xl font-black text-white">Player Inventory</h2>
+              <p class="text-sm text-slate-500 font-medium">Manage your resources and products</p>
             </div>
           </div>
-
-          <!-- Middle Column: Inventory -->
-          <div class="inventory-col">
-            <div class="glass-card">
-              <h3>Inventory</h3>
-              <div class="inventory-section">
-                <h4>Raw Materials</h4>
-                <div id="raw-materials-list" class="item-grid-tiny"></div>
+          <div class="space-y-10">
+            <div>
+              <div class="flex items-center gap-2 mb-4">
+                <span class="material-symbols-rounded text-amber-400">inventory_2</span>
+                <h3 class="text-xs font-black uppercase tracking-widest text-slate-500">Raw Materials</h3>
               </div>
-              <div class="inventory-section">
-                <h4>Finished Goods</h4>
-                <div id="finished-goods-list" class="item-grid-tiny"></div>
-              </div>
-              <div class="inventory-section">
-                <h4>Purchased Goods</h4>
-                <div id="purchased-goods-list" class="item-grid-tiny"></div>
-              </div>
+              <div id="raw-materials-list" class="grid grid-cols-4 lg:grid-cols-6 gap-4"></div>
             </div>
-          </div>
-
-          <!-- Right Column: Stats & Chat -->
-          <div class="chat-col">
-            <div class="glass-card">
-              <div class="main-dashboard-stats">
-                <div class="stat-mini">
-                  <label>❤️ Health</label>
-                  <div class="progress-bar-tiny">
-                    <div id="health-bar" class="progress fill-green"></div>
-                  </div>
-                </div>
-                <div class="stat-mini">
-                  <label>🍔 Hunger</label>
-                  <div class="progress-bar-tiny">
-                    <div id="hunger-bar" class="progress fill-orange"></div>
-                  </div>
-                </div>
-                <div class="stat-mini">
-                  <label>🥤 Thirst</label>
-                  <div class="progress-bar-tiny">
-                    <div id="thirst-bar" class="progress fill-blue"></div>
-                  </div>
-                </div>
+            <div>
+              <div class="flex items-center gap-2 mb-4">
+                <span class="material-symbols-rounded text-blue-400">package_2</span>
+                <h3 class="text-xs font-black uppercase tracking-widest text-slate-500">Finished Goods</h3>
               </div>
+              <div id="finished-goods-list" class="grid grid-cols-4 lg:grid-cols-6 gap-4"></div>
             </div>
-            <div class="glass-card chat-wrapper">
-              <h3>Chat</h3>
-              <div class="chat-container">
-                <div id="chat-messages" class="chat-messages"></div>
-                <form id="chat-form" class="inline-form">
-                  <input type="text" id="chat-input" placeholder="Type a message..." required autocomplete="off">
-                  <button type="submit" class="btn-primary">Send</button>
-                </form>
+            <div>
+              <div class="flex items-center gap-2 mb-4">
+                <span class="material-symbols-rounded text-pink-400">shopping_basket</span>
+                <h3 class="text-xs font-black uppercase tracking-widest text-slate-500">Purchased Goods</h3>
               </div>
+              <div id="purchased-goods-list" class="grid grid-cols-4 lg:grid-cols-6 gap-4"></div>
             </div>
           </div>
         </div>
+
+        <!-- Right Sidebar: Stats & Chat -->
+        <aside class="w-80 flex flex-col gap-4">
+          <section class="glass bg-card-dark rounded-2xl p-5 border border-white/10">
+            <h2 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-6">Physical Condition</h2>
+            <div class="flex justify-around items-center">
+              <div class="flex flex-col items-center gap-2 group">
+                <div class="relative w-16 h-16">
+                  <svg class="w-full h-full -rotate-90">
+                    <circle class="text-slate-800" cx="32" cy="32" fill="transparent" r="28" stroke="currentColor"
+                      stroke-width="6"></circle>
+                    <circle id="health-gauge" class="text-rose-500 gauge-ring" cx="32" cy="32" fill="transparent" r="28"
+                      stroke="currentColor" stroke-dasharray="176" stroke-dashoffset="0" stroke-width="6"></circle>
+                  </svg>
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <span
+                      class="material-symbols-rounded text-rose-500 text-xl group-hover:animate-bounce">favorite</span>
+                  </div>
+                </div>
+                <span id="health-val" class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Health
+                  100%</span>
+              </div>
+              <div class="flex flex-col items-center gap-2 group">
+                <div class="relative w-16 h-16">
+                  <svg class="w-full h-full -rotate-90">
+                    <circle class="text-slate-800" cx="32" cy="32" fill="transparent" r="28" stroke="currentColor"
+                      stroke-width="6"></circle>
+                    <circle id="hunger-gauge" class="text-amber-500 gauge-ring" cx="32" cy="32" fill="transparent"
+                      r="28" stroke="currentColor" stroke-dasharray="176" stroke-dashoffset="0" stroke-width="6">
+                    </circle>
+                  </svg>
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <span
+                      class="material-symbols-rounded text-amber-500 text-xl group-hover:scale-125 transition-transform">restaurant</span>
+                  </div>
+                </div>
+                <span id="hunger-val" class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Hunger
+                  100%</span>
+              </div>
+              <div class="flex flex-col items-center gap-2 group">
+                <div class="relative w-16 h-16">
+                  <svg class="w-full h-full -rotate-90">
+                    <circle class="text-slate-800" cx="32" cy="32" fill="transparent" r="28" stroke="currentColor"
+                      stroke-width="6"></circle>
+                    <circle id="thirst-gauge" class="text-blue-400 gauge-ring" cx="32" cy="32" fill="transparent" r="28"
+                      stroke="currentColor" stroke-dasharray="176" stroke-dashoffset="0" stroke-width="6"></circle>
+                  </svg>
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <span
+                      class="material-symbols-rounded text-blue-400 text-xl group-hover:rotate-12 transition-transform">water_full</span>
+                  </div>
+                </div>
+                <span id="thirst-val" class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Thirst
+                  100%</span>
+              </div>
+            </div>
+          </section>
+
+          <section
+            class="glass bg-card-dark rounded-2xl p-4 border border-white/10 flex-1 flex flex-col overflow-hidden">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></div>
+              <h2 class="text-xs font-bold text-slate-500 uppercase tracking-widest">Global Comms</h2>
+            </div>
+            <div id="chat-messages" class="flex-1 overflow-y-auto space-y-4 mb-4 pr-1 terminal-scroll"></div>
+            <form id="chat-form" class="mt-auto relative">
+              <input id="chat-input"
+                class="w-full bg-slate-900/50 border border-white/10 rounded-xl px-4 py-3 text-xs focus:ring-1 focus:ring-primary focus:border-primary transition-all pr-12"
+                placeholder="Send a message..." type="text" autocomplete="off" />
+              <button type="submit"
+                class="absolute right-2 top-2 p-1.5 rounded-lg bg-primary hover:bg-blue-600 text-white transition-colors">
+                <span class="material-symbols-rounded text-sm">send</span>
+              </button>
+            </form>
+          </section>
+        </aside>
       </section>
 
       <!-- Market Tab -->
-      <section id="market" class="tab-pane">
-        <div class="market-container">
-          <div class="market-actions">
-            <h3>List an Item</h3>
-            <form id="sell-form" class="inline-form">
-              <select id="sell-item" required></select>
-              <input type="number" id="sell-qty" placeholder="Qty" min="1" required>
-              <input type="number" id="sell-price" placeholder="Price each" min="1" required>
-              <button type="submit" class="btn-primary">List</button>
-            </form>
+      <section id="market" class="tab-pane hidden w-full">
+        <div class="bg-slate-900/50 border-b border-slate-800 py-2 overflow-hidden">
+          <div id="market-ticker" class="animate-marquee whitespace-nowrap">
+            <span class="mx-8 text-xs font-medium">Welcome to the EcoSurvival Trade Network.</span>
           </div>
-          <div class="market-listings">
-            <h3>Active Listings</h3>
-            <div id="market-list-container">
-              <!-- Listings here -->
+        </div>
+        <div class="max-w-[1600px] mx-auto p-8 grid grid-cols-12 gap-8 h-full">
+          <section class="col-span-12 lg:col-span-4 xl:col-span-3">
+            <div class="bg-card-dark rounded-2xl border border-slate-800 p-6 shadow-sm sticky top-8">
+              <div class="flex items-center space-x-2 mb-6">
+                <span class="material-icons text-primary">add_business</span>
+                <h2 class="text-xl font-bold">List an Item</h2>
+              </div>
+              <form id="sell-form" class="space-y-5">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-500 uppercase mb-2">Select Item</label>
+                  <select id="sell-item" required
+                    class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all appearance-none"></select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-500 uppercase mb-2">Quantity</label>
+                  <div class="relative">
+                    <input id="sell-qty"
+                      class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                      placeholder="0" type="number" min="1" required />
+                    <span class="absolute right-4 top-3.5 text-slate-500 text-sm">units</span>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-500 uppercase mb-2">Price each</label>
+                  <div class="relative">
+                    <span class="absolute left-4 top-3.5 text-slate-500">$</span>
+                    <input id="sell-price"
+                      class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-8 pr-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                      placeholder="0" type="number" min="1" required />
+                  </div>
+                </div>
+                <div class="pt-4">
+                  <button
+                    class="w-full bg-gradient-to-r from-primary to-secondary text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 active:scale-[0.98] transition-all flex items-center justify-center space-x-2"
+                    type="submit">
+                    <span>Post Listing</span>
+                    <span class="material-icons text-sm">trending_up</span>
+                  </button>
+                </div>
+              </form>
             </div>
-          </div>
+          </section>
+          <section class="col-span-12 lg:col-span-8 xl:col-span-9">
+            <div class="flex items-center justify-between mb-8">
+              <div class="flex items-center space-x-3">
+                <span class="material-icons text-primary">grid_view</span>
+                <h2 class="text-2xl font-bold">Active Listings</h2>
+              </div>
+            </div>
+            <div id="market-list-container"
+              class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 overflow-y-auto max-h-[calc(100vh-300px)] pr-2 terminal-scroll">
+            </div>
+          </section>
         </div>
       </section>
 
       <!-- Admin Tab -->
-      <section id="admin" class="tab-pane">
-        <div class="admin-grid">
-          <div class="glass-card">
-            <h3>Controls</h3>
-            <button id="admin-start-btn" class="btn-primary">Start Round</button>
-            <button id="admin-end-btn" class="btn-danger">End Round</button>
+      <section id="admin" class="tab-pane hidden w-full p-6 lg:p-8 max-w-[1600px] mx-auto grid grid-cols-12 gap-6">
+        <section class="col-span-12 lg:col-span-3 space-y-6">
+          <div class="glass bg-card-dark rounded-2xl p-6 shadow-2xl relative overflow-hidden">
+            <div class="flex items-center gap-2 mb-8">
+              <span class="material-symbols-outlined text-primary">settings_remote</span>
+              <h2 class="text-sm font-bold uppercase tracking-widest text-slate-500">Game Controls</h2>
+            </div>
+            <div class="space-y-4">
+              <button id="admin-start-btn"
+                class="w-full group relative overflow-hidden bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-5 rounded-xl transition-all active:scale-95 shadow-lg shadow-emerald-500/20">
+                <div class="relative z-10 flex items-center justify-center gap-3">
+                  <span class="material-symbols-outlined text-2xl">play_circle</span>
+                  <span class="text-lg uppercase">Start Round</span>
+                </div>
+              </button>
+              <button id="admin-end-btn"
+                class="w-full group relative overflow-hidden bg-danger-red hover:bg-red-500 text-white font-bold py-5 rounded-xl transition-all active:scale-95 shadow-lg shadow-red-500/20">
+                <div class="relative z-10 flex items-center justify-center gap-3">
+                  <span class="material-symbols-outlined text-2xl">stop_circle</span>
+                  <span class="text-lg uppercase">End Round</span>
+                </div>
+              </button>
+            </div>
           </div>
-          <div class="glass-card">
-            <h3>Players</h3>
-            <div id="admin-players-list"></div>
+        </section>
+        <section class="col-span-12 lg:col-span-6 space-y-6">
+          <div class="glass bg-card-dark rounded-2xl overflow-hidden shadow-2xl flex flex-col h-full">
+            <div class="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900/40">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-cyan-400">group</span>
+                <h2 class="text-sm font-bold uppercase tracking-widest text-slate-500">Player Overview</h2>
+              </div>
+            </div>
+            <div class="overflow-x-auto terminal-scroll">
+              <table class="w-full text-left border-collapse">
+                <thead class="bg-slate-900/50 sticky top-0 z-10">
+                  <tr>
+                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Player</th>
+                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Vitals</th>
+                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Balance</th>
+                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-right">
+                      Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-players-list" class="divide-y divide-slate-800"></tbody>
+              </table>
+            </div>
           </div>
-          <div class="glass-card">
-            <h3>Trade Logs</h3>
-            <div id="admin-logs" class="logs-container"></div>
+        </section>
+        <section class="col-span-12 lg:col-span-3 h-full">
+          <div class="glass bg-panel-dark rounded-2xl h-full flex flex-col shadow-2xl overflow-hidden border-slate-800">
+            <div class="p-4 border-b border-emerald-500/20 bg-slate-900/50 flex justify-between items-center">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-terminal-green text-sm animate-pulse">terminal</span>
+                <h2 class="text-[10px] font-bold uppercase tracking-widest text-emerald-500">System Logs</h2>
+              </div>
+            </div>
+            <div id="admin-logs"
+              class="p-4 flex-grow terminal-scroll overflow-y-auto font-mono text-[11px] space-y-2 leading-relaxed h-[600px] bg-black/40 text-emerald-500/80">
+            </div>
           </div>
-        </div>
+        </section>
       </section>
     </main>
+
+    <footer class="p-4 flex justify-center pointer-events-none">
+      <div
+        class="glass bg-slate-900/60 border border-white/10 rounded-full px-8 py-3 flex gap-10 items-center pointer-events-auto">
+        <div class="flex items-center gap-3">
+          <span class="text-[10px] font-black uppercase text-slate-500 tracking-widest">Global Economy</span>
+          <span id="global-bank" class="text-sm font-bold text-emerald-400">$0</span>
+        </div>
+        <div class="h-4 w-[1px] bg-white/10"></div>
+        <div class="flex items-center gap-3">
+          <span class="text-[10px] font-black uppercase text-slate-500 tracking-widest">Active Players</span>
+          <span id="active-players-count" class="text-sm font-bold text-white">0</span>
+        </div>
+      </div>
+    </footer>
   </div>
 
-  <div id="game-over-screen" class="screen hidden">
-    <div class="glass-card overlay-card">
-      <h1>Round Over</h1>
-      <div id="leaderboard"></div>
-      <button onclick="location.reload()" class="btn-primary">Back to Lobby</button>
+  <!-- Game Over Screen -->
+  <div id="game-over-screen"
+    class="hidden fixed inset-0 z-[100] bg-background-dark/95 backdrop-blur-xl flex items-center justify-center p-6">
+    <div class="glass bg-card-dark rounded-[2rem] p-12 max-w-xl w-full text-center border-white/10">
+      <h1 class="font-display text-5xl font-black text-white mb-8">ROUND OVER</h1>
+      <div id="leaderboard" class="space-y-4 mb-10"></div>
+      <button onclick="location.reload()"
+        class="w-full py-4 rounded-xl bg-primary text-white font-bold tracking-widest uppercase hover:bg-blue-600 transition-all">Back
+        to Lobby</button>
     </div>
   </div>
 
   <div id="notification-area"></div>
 
   <script type="module" src="main.js"></script>
+  <script>
+    // Particle Generator
+    const particleContainer = document.getElementById('particles');
+    const count = 30;
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      const size = Math.random() * 4 + 1 + 'px';
+      p.style.width = size;
+      p.style.height = size;
+      p.style.left = Math.random() * 100 + '%';
+      p.style.top = Math.random() * 100 + 100 + '%';
+      p.style.animationDuration = Math.random() * 10 + 10 + 's';
+      p.style.animationDelay = Math.random() * 10 + 's';
+      particleContainer.appendChild(p);
+    }
+  </script>
 </body>
 
 </html>
