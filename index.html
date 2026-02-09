@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcoSurvival - Economic Behavior Game</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <div id="login-screen" class="screen">
+    <div class="glass-card login-card">
+      <h1>EcoSurvival</h1>
+      <p>Master the economy or perish.</p>
+      <form id="login-form">
+        <div class="input-group">
+          <label for="player-name">Name</label>
+          <input type="text" id="player-name" required placeholder="Enter your name...">
+        </div>
+        <div class="input-group">
+          <label>Choose Your Business</label>
+          <div class="business-selection">
+            <label class="business-option">
+              <input type="radio" name="businessType" value="water_vendor" checked>
+              <span class="option-card">
+                <h3>Water Vendor</h3>
+                <p>Produces: Water Bottle</p>
+              </span>
+            </label>
+            <label class="business-option">
+              <input type="radio" name="businessType" value="hotdog_vendor">
+              <span class="option-card">
+                <h3>Hotdog Vendor</h3>
+                <p>Produces: Hotdog</p>
+              </span>
+            </label>
+            <label class="business-option">
+              <input type="radio" name="businessType" value="chicken_rice_vendor">
+              <span class="option-card">
+                <h3>Chicken Rice Vendor</h3>
+                <p>Produces: Chicken Rice</p>
+              </span>
+            </label>
+            <label class="business-option">
+              <input type="radio" name="businessType" value="medicine_vendor">
+              <span class="option-card">
+                <h3>Medicine Vendor</h3>
+                <p>Produces: Medicine</p>
+              </span>
+            </label>
+          </div>
+        </div>
+        <button type="submit" class="btn-primary">Join Game</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="game-screen" class="screen hidden">
+    <header>
+      <div class="logo">EcoSurvival</div>
+      <div id="round-timer" class="timer">Round starts soon...</div>
+      <div class="user-info">
+        <span id="header-money">$0</span>
+        <span id="player-status-badge" class="badge">ALIVE</span>
+      </div>
+    </header>
+
+    <nav class="tabs">
+      <button class="tab-link active" data-tab="dashboard">Dashboard</button>
+      <button class="tab-link" data-tab="market">Market</button>
+      <button class="tab-link hidden" id="admin-tab-link" data-tab="admin">Admin</button>
+    </nav>
+
+    <main id="tab-content">
+      <!-- Dashboard Tab (Merged) -->
+      <section id="dashboard" class="tab-pane active">
+        <div class="dashboard-grid">
+          <!-- Left Column: Business & Shop -->
+          <div class="side-col">
+            <div class="glass-card">
+              <h3>My Business</h3>
+              <div id="recipe-info" class="recipe-card"></div>
+              <button id="produce-btn" class="btn-primary">Produce (Cost $1)</button>
+            </div>
+            <div class="glass-card">
+              <h3>Raw Material Shop</h3>
+              <div class="shop-grid-compact" id="system-shop-items"></div>
+            </div>
+          </div>
+
+          <!-- Middle Column: Inventory -->
+          <div class="inventory-col">
+            <div class="glass-card">
+              <h3>Inventory</h3>
+              <div class="inventory-section">
+                <h4>Raw Materials</h4>
+                <div id="raw-materials-list" class="item-grid-tiny"></div>
+              </div>
+              <div class="inventory-section">
+                <h4>Finished Goods</h4>
+                <div id="finished-goods-list" class="item-grid-tiny"></div>
+              </div>
+              <div class="inventory-section">
+                <h4>Purchased Goods</h4>
+                <div id="purchased-goods-list" class="item-grid-tiny"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Stats & Chat -->
+          <div class="chat-col">
+            <div class="glass-card">
+              <div class="main-dashboard-stats">
+                <div class="stat-mini">
+                  <label>❤️ Health</label>
+                  <div class="progress-bar-tiny">
+                    <div id="health-bar" class="progress fill-green"></div>
+                  </div>
+                </div>
+                <div class="stat-mini">
+                  <label>🍔 Hunger</label>
+                  <div class="progress-bar-tiny">
+                    <div id="hunger-bar" class="progress fill-orange"></div>
+                  </div>
+                </div>
+                <div class="stat-mini">
+                  <label>🥤 Thirst</label>
+                  <div class="progress-bar-tiny">
+                    <div id="thirst-bar" class="progress fill-blue"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="glass-card chat-wrapper">
+              <h3>Chat</h3>
+              <div class="chat-container">
+                <div id="chat-messages" class="chat-messages"></div>
+                <form id="chat-form" class="inline-form">
+                  <input type="text" id="chat-input" placeholder="Type a message..." required autocomplete="off">
+                  <button type="submit" class="btn-primary">Send</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Market Tab -->
+      <section id="market" class="tab-pane">
+        <div class="market-container">
+          <div class="market-actions">
+            <h3>List an Item</h3>
+            <form id="sell-form" class="inline-form">
+              <select id="sell-item" required></select>
+              <input type="number" id="sell-qty" placeholder="Qty" min="1" required>
+              <input type="number" id="sell-price" placeholder="Price each" min="1" required>
+              <button type="submit" class="btn-primary">List</button>
+            </form>
+          </div>
+          <div class="market-listings">
+            <h3>Active Listings</h3>
+            <div id="market-list-container">
+              <!-- Listings here -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Admin Tab -->
+      <section id="admin" class="tab-pane">
+        <div class="admin-grid">
+          <div class="glass-card">
+            <h3>Controls</h3>
+            <button id="admin-start-btn" class="btn-primary">Start Round</button>
+            <button id="admin-end-btn" class="btn-danger">End Round</button>
+          </div>
+          <div class="glass-card">
+            <h3>Players</h3>
+            <div id="admin-players-list"></div>
+          </div>
+          <div class="glass-card">
+            <h3>Trade Logs</h3>
+            <div id="admin-logs" class="logs-container"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="game-over-screen" class="screen hidden">
+    <div class="glass-card overlay-card">
+      <h1>Round Over</h1>
+      <div id="leaderboard"></div>
+      <button onclick="location.reload()" class="btn-primary">Back to Lobby</button>
+    </div>
+  </div>
+
+  <div id="notification-area"></div>
+
+  <script type="module" src="main.js"></script>
+</body>
+
+</html>
