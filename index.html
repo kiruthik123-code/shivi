@@ -50,6 +50,86 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
+    .glass-panel {
+      @apply bg-card-dark backdrop-blur-xl border border-slate-700/50 shadow-2xl;
+    }
+
+    .liquid-hover {
+      @apply relative overflow-hidden z-10 transition-all duration-300;
+    }
+
+    .liquid-hover::before {
+      content: '';
+      @apply absolute inset-0 w-full h-full -z-10 opacity-0 transition-opacity duration-300;
+      background: linear-gradient(45deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.1));
+    }
+
+    .liquid-hover:hover::before {
+      @apply opacity-100;
+    }
+
+    .liquid-hover:hover {
+      @apply transform -translate-y-0.5 shadow-[0_0_20px_rgba(255, 255, 255, 0.1)];
+    }
+
+    .terminal-glow {
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.1), inset 0 0 30px rgba(16, 185, 129, 0.05);
+      background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(16, 185, 129, 0.03) 3px);
+      background-size: 100% 4px;
+    }
+
+    .neon-text-green {
+      text-shadow: 0 0 5px rgba(16, 185, 129, 0.5);
+    }
+
+    .btn-pulse-green {
+      animation: glow-pulse-green 2s infinite;
+    }
+
+    @keyframes glow-pulse-green {
+      0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+      }
+
+      70% {
+        box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+      }
+    }
+
+    .btn-pulse-red {
+      animation: glow-pulse-red 2s infinite;
+    }
+
+    @keyframes glow-pulse-red {
+      0% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+      }
+
+      70% {
+        box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+      }
+    }
+
+    .chart-line {
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .chart-grid {
+      stroke: rgba(148, 163, 184, 0.1);
+      stroke-width: 1;
+    }
+
     .particle {
       position: absolute;
       background: white;
@@ -116,7 +196,7 @@
 
     @keyframes marquee {
       0% {
-        transform: translateX(100%);
+        transform: translateX(100vw);
       }
 
       100% {
@@ -213,18 +293,18 @@
               </label>
             </div>
             <div class="relative">
-              <input class="hidden custom-radio" id="medicine_vendor" name="businessType" type="radio"
-                value="medicine_vendor" />
+              <input class="hidden custom-radio" id="juice_vendor" name="businessType" type="radio"
+                value="juice_vendor" />
               <label
                 class="flex items-center p-5 rounded-2xl border-2 border-slate-700 cursor-pointer transition-all card-hover group h-full"
-                for="medicine_vendor">
+                for="juice_vendor">
                 <div
-                  class="w-14 h-14 rounded-xl bg-red-500/10 flex items-center justify-center mr-4 shrink-0 border border-red-500/20">
-                  <span class="material-symbols-rounded text-red-400 text-3xl">medication</span>
+                  class="w-14 h-14 rounded-xl bg-orange-500/10 flex items-center justify-center mr-4 shrink-0 border border-orange-500/20">
+                  <span class="material-symbols-rounded text-orange-400 text-3xl">local_drink</span>
                 </div>
                 <div>
-                  <h3 class="font-bold text-lg text-white">Medicine Shop</h3>
-                  <p class="text-sm text-slate-500">Vital Health Services</p>
+                  <h3 class="font-bold text-lg text-white">Juice Shop</h3>
+                  <p class="text-sm text-slate-500">Fresh & Natural Refreshments</p>
                 </div>
               </label>
             </div>
@@ -286,6 +366,13 @@
         </div>
       </div>
     </nav>
+
+    <!-- Global Market Ticker -->
+    <div class="bg-slate-900/50 border-b border-slate-800 py-2 overflow-hidden sticky top-0 z-40 backdrop-blur-md">
+      <div id="market-ticker" class="animate-marquee whitespace-nowrap">
+        <span class="mx-8 text-xs font-medium">Welcome to the EcoSurvival Trade Network.</span>
+      </div>
+    </div>
 
     <!-- Content Area -->
     <main id="tab-content" class="flex-1 flex overflow-hidden">
@@ -431,13 +518,8 @@
 
       <!-- Market Tab -->
       <section id="market" class="tab-pane hidden w-full">
-        <div class="bg-slate-900/50 border-b border-slate-800 py-2 overflow-hidden">
-          <div id="market-ticker" class="animate-marquee whitespace-nowrap">
-            <span class="mx-8 text-xs font-medium">Welcome to the EcoSurvival Trade Network.</span>
-          </div>
-        </div>
         <div class="max-w-[1600px] mx-auto p-8 grid grid-cols-12 gap-8 h-full">
-          <section class="col-span-12 lg:col-span-4 xl:col-span-3">
+          <section id="market-listing-section" class="col-span-12 lg:col-span-4 xl:col-span-3">
             <div class="bg-card-dark rounded-2xl border border-slate-800 p-6 shadow-sm sticky top-8">
               <div class="flex items-center space-x-2 mb-6">
                 <span class="material-icons text-primary">add_business</span>
@@ -478,7 +560,7 @@
               </form>
             </div>
           </section>
-          <section class="col-span-12 lg:col-span-8 xl:col-span-9">
+          <section id="market-display-section" class="col-span-12 lg:col-span-8 xl:col-span-9">
             <div class="flex items-center justify-between mb-8">
               <div class="flex items-center space-x-3">
                 <span class="material-icons text-primary">grid_view</span>
@@ -492,69 +574,207 @@
         </div>
       </section>
 
-      <!-- Admin Tab -->
-      <section id="admin" class="tab-pane hidden w-full p-6 lg:p-8 max-w-[1600px] mx-auto grid grid-cols-12 gap-6">
-        <section class="col-span-12 lg:col-span-3 space-y-6">
-          <div class="glass bg-card-dark rounded-2xl p-6 shadow-2xl relative overflow-hidden">
-            <div class="flex items-center gap-2 mb-8">
-              <span class="material-symbols-outlined text-primary">settings_remote</span>
-              <h2 class="text-sm font-bold uppercase tracking-widest text-slate-500">Game Controls</h2>
+      <!-- Admin HQ Tab -->
+      <section id="admin"
+        class="tab-pane hidden w-full p-6 lg:p-8 max-w-[1920px] mx-auto grid grid-cols-1 md:grid-cols-12 gap-6">
+        <!-- Dashboard Column 1: Controls & Player Feed -->
+        <div class="md:col-span-12 lg:col-span-3 space-y-6 flex flex-col">
+          <!-- Game Controls -->
+          <div class="glass-panel rounded-2xl p-5 bg-slate-900/60 border-slate-700/50">
+            <div class="flex items-center space-x-3 mb-4 pb-2 border-b border-slate-700/50">
+              <div
+                class="p-1.5 bg-cyan-950/30 text-cyan-400 rounded-lg border border-cyan-900/30 shadow-[0_0_10px_rgba(34,211,238,0.1)]">
+                <span class="material-symbols-outlined text-base">settings_remote</span>
+              </div>
+              <span class="text-xs font-bold text-slate-300 uppercase tracking-widest">Controls</span>
             </div>
-            <div class="space-y-4">
+            <div class="grid grid-cols-2 gap-3">
               <button id="admin-start-btn"
-                class="w-full group relative overflow-hidden bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-5 rounded-xl transition-all active:scale-95 shadow-lg shadow-emerald-500/20">
-                <div class="relative z-10 flex items-center justify-center gap-3">
-                  <span class="material-symbols-outlined text-2xl">play_circle</span>
-                  <span class="text-lg uppercase">Start Round</span>
+                class="w-full bg-black border border-emerald-500/50 text-white p-1 rounded-xl shadow-[0_0_15px_rgba(16,185,129,0.1)] hover:shadow-[0_0_20px_rgba(16,185,129,0.2)] liquid-hover group btn-pulse-green transition-all duration-300">
+                <div
+                  class="bg-emerald-950/40 backdrop-blur-sm rounded-lg py-3 flex flex-col items-center justify-center h-full w-full border border-emerald-500/20 group-hover:border-emerald-400/50 transition-colors">
+                  <span
+                    class="material-symbols-outlined text-2xl text-emerald-400 mb-1 group-hover:scale-110 transition-transform">play_circle</span>
+                  <div
+                    class="text-[10px] font-bold tracking-tight text-emerald-100 group-hover:text-white neon-text-green uppercase">
+                    Start</div>
                 </div>
               </button>
               <button id="admin-end-btn"
-                class="w-full group relative overflow-hidden bg-danger-red hover:bg-red-500 text-white font-bold py-5 rounded-xl transition-all active:scale-95 shadow-lg shadow-red-500/20">
-                <div class="relative z-10 flex items-center justify-center gap-3">
-                  <span class="material-symbols-outlined text-2xl">stop_circle</span>
-                  <span class="text-lg uppercase">End Round</span>
+                class="w-full bg-black border border-rose-500/50 text-white p-1 rounded-xl shadow-[0_0_15px_rgba(244,63,94,0.1)] hover:shadow-[0_0_20px_rgba(244,63,94,0.2)] liquid-hover group btn-pulse-red transition-all duration-300">
+                <div
+                  class="bg-rose-950/40 backdrop-blur-sm rounded-lg py-3 flex flex-col items-center justify-center h-full w-full border border-rose-500/20 group-hover:border-rose-400/50 transition-colors">
+                  <span
+                    class="material-symbols-outlined text-2xl text-rose-400 mb-1 group-hover:scale-110 transition-transform">stop_circle</span>
+                  <div class="text-[10px] font-bold tracking-tight text-rose-100 group-hover:text-white uppercase">End
+                  </div>
                 </div>
               </button>
             </div>
           </div>
-        </section>
-        <section class="col-span-12 lg:col-span-6 space-y-6">
-          <div class="glass bg-card-dark rounded-2xl overflow-hidden shadow-2xl flex flex-col h-full">
-            <div class="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900/40">
-              <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-cyan-400">group</span>
-                <h2 class="text-sm font-bold uppercase tracking-widest text-slate-500">Player Overview</h2>
+
+          <!-- Active Players Overview -->
+          <div
+            class="glass-panel rounded-2xl flex-1 flex flex-col overflow-hidden bg-slate-900/60 border-slate-700/50 max-h-[calc(100vh-400px)]">
+            <div class="p-4 border-b border-slate-700/50 flex justify-between items-center bg-slate-800/30">
+              <div class="flex items-center space-x-2">
+                <div
+                  class="p-1.5 bg-indigo-950/30 text-indigo-400 rounded-lg border border-indigo-900/30 shadow-[0_0_10px_rgba(129,140,248,0.1)]">
+                  <span class="material-symbols-outlined text-base">group</span>
+                </div>
+                <h2 class="font-bold text-slate-200 text-sm tracking-wide">Survivors</h2>
               </div>
             </div>
-            <div class="overflow-x-auto terminal-scroll">
-              <table class="w-full text-left border-collapse">
-                <thead class="bg-slate-900/50 sticky top-0 z-10">
-                  <tr>
-                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Player</th>
-                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Vitals</th>
-                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Balance</th>
-                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-right">
-                      Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="admin-players-list" class="divide-y divide-slate-800"></tbody>
-              </table>
+            <div id="admin-players-list-scroll" class="overflow-y-auto terminal-scroll flex-1 p-3">
+              <div id="admin-players-list" class="space-y-3">
+                <!-- Players injected here via main.js -->
+              </div>
             </div>
           </div>
-        </section>
-        <section class="col-span-12 lg:col-span-3 h-full">
-          <div class="glass bg-panel-dark rounded-2xl h-full flex flex-col shadow-2xl overflow-hidden border-slate-800">
-            <div class="p-4 border-b border-emerald-500/20 bg-slate-900/50 flex justify-between items-center">
-              <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-terminal-green text-sm animate-pulse">terminal</span>
-                <h2 class="text-[10px] font-bold uppercase tracking-widest text-emerald-500">System Logs</h2>
+        </div>
+
+        <!-- Dashboard Column 2: Market Analytics -->
+        <div class="md:col-span-12 lg:col-span-6 flex flex-col space-y-6">
+          <div class="glass-panel rounded-2xl p-6 bg-slate-900/60 border-slate-700/50 flex-1">
+            <div class="flex items-center justify-between mb-8">
+              <div class="flex items-center space-x-3">
+                <div
+                  class="p-2 bg-amber-950/30 text-amber-400 rounded-lg border border-amber-900/30 shadow-[0_0_10px_rgba(251,191,36,0.1)]">
+                  <span class="material-symbols-outlined text-xl">analytics</span>
+                </div>
+                <div>
+                  <h2 class="font-bold text-slate-200 tracking-wide text-lg">Market Analytics</h2>
+                  <p class="text-xs text-slate-500 font-mono">Dynamic economic monitoring</p>
+                </div>
+              </div>
+              <div class="flex items-center space-x-4 text-xs font-bold uppercase tracking-widest">
+                <div class="flex items-center space-x-1.5">
+                  <div class="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.6)]"></div>
+                  <span class="text-slate-400">Demand</span>
+                </div>
+                <div class="flex items-center space-x-1.5">
+                  <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.6)]"></div>
+                  <span class="text-slate-400">Price</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Charts Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 h-full pb-4">
+              <!-- Water Chart -->
+              <div
+                class="bg-black/40 rounded-xl border border-slate-800 p-4 relative overflow-hidden group hover:border-blue-500/30 transition-colors">
+                <div class="flex justify-between items-center mb-4">
+                  <div class="flex items-center space-x-2">
+                    <span class="material-symbols-outlined text-blue-400 text-lg">water_drop</span>
+                    <span class="text-sm font-bold text-blue-100 uppercase tracking-widest">Water</span>
+                  </div>
+                  <span id="water-price-display" class="text-xs font-mono text-blue-400">$-.--</span>
+                </div>
+                <div class="h-32 w-full relative">
+                  <svg class="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 50">
+                    <line class="chart-grid" vector-effect="non-scaling-stroke" x1="0" x2="100" y1="10" y2="10"></line>
+                    <line class="chart-grid" vector-effect="non-scaling-stroke" x1="0" x2="100" y1="25" y2="25"></line>
+                    <line class="chart-grid" vector-effect="non-scaling-stroke" x1="0" x2="100" y1="40" y2="40"></line>
+                    <path id="water-demand-line" class="chart-line stroke-cyan-400 opacity-80"
+                      d="M0,45 C10,40 20,42 30,35 C40,28 50,30 60,20 C70,10 80,15 90,8 L100,5"
+                      vector-effect="non-scaling-stroke"></path>
+                    <path id="water-price-line" class="chart-line stroke-emerald-400"
+                      d="M0,30 C15,32 30,28 45,25 C60,22 75,18 90,20 L100,15" vector-effect="non-scaling-stroke"></path>
+                  </svg>
+                </div>
+              </div>
+              <!-- Bread Chart -->
+              <div
+                class="bg-black/40 rounded-xl border border-slate-800 p-4 relative overflow-hidden group hover:border-orange-500/30 transition-colors">
+                <div class="flex justify-between items-center mb-4">
+                  <div class="flex items-center space-x-2">
+                    <span class="material-symbols-outlined text-orange-400 text-lg">bakery_dining</span>
+                    <span class="text-sm font-bold text-orange-100 uppercase tracking-widest">Hotdog</span>
+                  </div>
+                  <span id="hotdog-price-display" class="text-xs font-mono text-orange-400">$-.--</span>
+                </div>
+                <div class="h-32 w-full relative">
+                  <svg class="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 50">
+                    <line class="chart-grid" vector-effect="non-scaling-stroke" x1="0" x2="100" y1="10" y2="10"></line>
+                    <line class="chart-grid" vector-effect="non-scaling-stroke" x1="0" x2="100" y1="25" y2="25"></line>
+                    <line class="chart-grid" vector-effect="non-scaling-stroke" x1="0" x2="100" y1="40" y2="40"></line>
+                    <path id="hotdog-demand-line" class="chart-line stroke-cyan-400 opacity-80"
+                      d="M0,20 C10,25 20,20 30,22 C40,25 50,35 60,30 C70,25 80,28 90,35 L100,32"
+                      vector-effect="non-scaling-stroke"></path>
+                    <path id="hotdog-price-line" class="chart-line stroke-emerald-400"
+                      d="M0,40 C20,38 40,35 60,32 C80,30 90,28 100,28" vector-effect="non-scaling-stroke"></path>
+                  </svg>
+                </div>
+              </div>
+              <!-- Medicine Chart -->
+              <div
+                class="bg-black/40 rounded-xl border border-slate-800 p-4 relative overflow-hidden group hover:border-rose-500/30 transition-colors">
+                <div class="flex justify-between items-center mb-4">
+                  <div class="flex items-center space-x-2">
+                    <span class="material-symbols-outlined text-rose-400 text-lg">medical_services</span>
+                    <span class="text-sm font-bold text-rose-100 uppercase tracking-widest">Medicine</span>
+                  </div>
+                  <span id="medicine-price-display" class="text-xs font-mono text-rose-400">$-.--</span>
+                </div>
+                <div class="h-32 w-full relative">
+                  <svg class="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 50">
+                    <line class="chart-grid" vector-effect="non-scaling-stroke" x1="0" x2="100" y1="10" y2="10"></line>
+                    <line class="chart-grid" vector-effect="non-scaling-stroke" x1="0" x2="100" y1="25" y2="25"></line>
+                    <line class="chart-grid" vector-effect="non-scaling-stroke" x1="0" x2="100" y1="40" y2="40"></line>
+                    <path id="medicine-demand-line" class="chart-line stroke-cyan-400 opacity-80"
+                      d="M0,45 C15,30 30,15 45,10 C60,5 75,8 90,5 L100,2" vector-effect="non-scaling-stroke"></path>
+                    <path id="medicine-price-line" class="chart-line stroke-emerald-400"
+                      d="M0,45 C20,40 40,35 60,25 C80,15 90,10 100,8" vector-effect="non-scaling-stroke"></path>
+                  </svg>
+                </div>
+              </div>
+              <!-- Resource Overview -->
+              <div
+                class="bg-black/40 rounded-xl border border-slate-800 p-4 relative overflow-hidden group hover:border-slate-400/30 transition-colors">
+                <div class="flex justify-between items-center mb-4">
+                  <div class="flex items-center space-x-2">
+                    <span class="material-symbols-outlined text-slate-200 text-lg">grain</span>
+                    <span class="text-sm font-bold text-slate-100 uppercase tracking-widest">Global Supply</span>
+                  </div>
+                  <span id="global-supply-count" class="text-xs font-mono text-slate-400">Total Units: --</span>
+                </div>
+                <div class="h-32 w-full relative">
+                  <svg class="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 50">
+                    <line class="chart-grid" vector-effect="non-scaling-stroke" x1="0" x2="100" y1="10" y2="10"></line>
+                    <line class="chart-grid" vector-effect="non-scaling-stroke" x1="0" x2="100" y1="25" y2="25"></line>
+                    <line class="chart-grid" vector-effect="non-scaling-stroke" x1="0" x2="100" y1="40" y2="40"></line>
+                    <path id="global-supply-line" class="chart-line stroke-cyan-400 opacity-80"
+                      d="M0,25 C10,25 20,25 30,25 C40,25 50,25 60,25 C70,25 80,25 90,25 L100,25"
+                      vector-effect="non-scaling-stroke"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dashboard Column 3: System Logs -->
+        <div class="md:col-span-12 lg:col-span-3 h-full">
+          <div
+            class="rounded-2xl border border-emerald-900/30 h-full min-h-[500px] flex flex-col overflow-hidden bg-black relative terminal-glow shadow-2xl">
+            <div class="absolute inset-0 bg-emerald-900/5 pointer-events-none z-0"></div>
+            <div class="p-4 border-b border-emerald-900/30 bg-black flex items-center justify-between relative z-10">
+              <div
+                class="flex items-center space-x-2 text-emerald-500 uppercase text-[10px] font-bold tracking-widest neon-text-green">
+                <span class="material-symbols-outlined text-sm">terminal</span>
+                <span>Command Logs</span>
+              </div>
+              <div class="flex space-x-1.5 text-[8px] text-emerald-700 font-mono">
+                SEC_LEVEL: ALPHA
               </div>
             </div>
             <div id="admin-logs"
-              class="p-4 flex-grow terminal-scroll overflow-y-auto font-mono text-[11px] space-y-2 leading-relaxed h-[600px] bg-black/40 text-emerald-500/80">
+              class="flex-1 p-5 font-mono text-[11px] text-emerald-500/90 overflow-y-auto space-y-2 relative z-10 terminal-scroll bg-black/40">
+              <!-- Logs injected here -->
             </div>
           </div>
-        </section>
+        </div>
       </section>
     </main>
 

@@ -29,7 +29,7 @@ const RECIPES = {
     water_vendor: { plastic: 1, water_raw: 1, output: 'water' },
     hotdog_vendor: { bread: 1, meat: 1, output: 'hotdog' },
     chicken_rice_vendor: { rice: 2, meat: 1, water_raw: 1, output: 'chicken_rice' },
-    medicine_vendor: { chemical: 2, output: 'medicine' }
+    juice_vendor: { fruit: 2, water_raw: 1, output: 'juice' }
 };
 
 const SYSTEM_SHOP = {
@@ -38,14 +38,17 @@ const SYSTEM_SHOP = {
     water_raw: 1,
     plastic: 1,
     bread: 2,
-    chemical: 4
+    fruit: 3
+    // chemical removed
 };
+
+const BUSINESS_SWITCH_FEE = 100;
 
 const CONSUMPTION_EFFECTS = {
     water: { thirst: 40 },
     hotdog: { hunger: 40 },
     chicken_rice: { hunger: 60 },
-    medicine: { health: 30 }
+    juice: { thirst: 30, health: 10 }
 };
 
 const DECAY_INTERVAL = 10000; // 10 seconds
@@ -229,6 +232,44 @@ io.on('connection', (socket) => {
         io.emit('stateUpdate', { players, market });
     });
 
+    socket.on('switchBusiness', ({ newBusinessType }) => {
+        const player = players[socket.id];
+        if (!player || !player.alive || player.isAdmin) return;
+        if (!RECIPES[newBusinessType]) return;
+        if (player.businessType === newBusinessType) {
+            socket.emit('notification', { message: 'You already own this business!', type: 'error' });
+            return;
+        }
+
+        if (player.money < BUSINESS_SWITCH_FEE) {
+            socket.emit('notification', { message: `Insufficient funds! Need $${BUSINESS_SWITCH_FEE} to switch.`, type: 'error' });
+            return;
+        }
+
+        // Deduct Fee
+        player.money -= BUSINESS_SWITCH_FEE;
+
+        // Cancel Unsold Market Listings
+        // Note: Returning items to inventory before clearing listing
+        market.forEach((listing, index) => {
+            if (listing.sellerId === socket.id) {
+                // Return items to inventory
+                player.inventory.finishedGoods[listing.item] += listing.quantity;
+            }
+        });
+        // Remove listings from global market array
+        market = market.filter(l => l.sellerId !== socket.id);
+
+        // Update Business
+        const oldBusiness = player.businessType;
+        player.businessType = newBusinessType;
+
+        socket.emit('notification', { message: `Business switched from ${oldBusiness.replace('_', ' ')} to ${newBusinessType.replace('_', ' ')}!`, type: 'success' });
+        // Send updated player state immediately
+        socket.emit('businessSwitched', { businessType: newBusinessType });
+        io.emit('stateUpdate', { players, market });
+    });
+
     socket.on('listMarket', ({ item, quantity, price }) => {
         const player = players[socket.id];
         if (!player || !player.alive || player.isAdmin) return;
@@ -248,6 +289,32 @@ io.on('connection', (socket) => {
         } else {
             socket.emit('notification', { message: 'Insufficient finished goods!', type: 'error' });
         }
+    });
+
+    socket.on('cancelListing', ({ listingId }) => {
+        const player = players[socket.id];
+        if (!player || !player.alive || player.isAdmin) return;
+
+        const listingIndex = market.findIndex(l => l.id === listingId);
+        if (listingIndex === -1) {
+            socket.emit('notification', { message: 'Listing not found!', type: 'error' });
+            return;
+        }
+
+        const listing = market[listingIndex];
+        if (listing.sellerId !== socket.id) {
+            socket.emit('notification', { message: 'Not your listing!', type: 'error' });
+            return;
+        }
+
+        // Return items to inventory
+        player.inventory.finishedGoods[listing.item] += listing.quantity;
+
+        // Remove listing
+        market.splice(listingIndex, 1);
+
+        socket.emit('notification', { message: 'Listing cancelled. Items returned.', type: 'info' });
+        io.emit('stateUpdate', { players, market });
     });
 
     socket.on('buyMarket', ({ listingId, quantity }) => {
