@@ -52,12 +52,26 @@ socket.on('joined', ({ player, gameStarted: serverGameStarted, roundEndTime }) =
     loginScreen.classList.add('hidden');
     gameScreen.classList.remove('hidden');
 
-    updateBusinessUIData();
-    renderShop();
+    if (myPlayer.isAdmin) {
+        document.getElementById('admin-tab-link').classList.remove('hidden');
+        // Switch to admin tab immediately for admin
+        document.querySelector('[data-tab="admin"]').click();
+        // Hide player-only elements
+        document.getElementById('dashboard-sidebar').classList.add('hidden');
+        document.getElementById('inventory-section').classList.add('hidden');
+        document.getElementById('vitals-section').classList.add('hidden');
+        document.getElementById('status-container').classList.add('hidden');
+        document.getElementById('header-money-container').classList.add('hidden');
+        document.querySelectorAll('.tab-link[data-tab="dashboard"]').forEach(el => el.classList.add('hidden'));
+    } else {
+        updateBusinessUIData();
+        renderShop();
+    }
+
     if (roundEndTime) startTimer(roundEndTime);
 
-    if (player.name.toLowerCase().includes('admin')) {
-        document.getElementById('admin-tab-link').classList.remove('hidden');
+    if (!gameStarted && !myPlayer.isAdmin) {
+        showNotification("Waiting for admin to start round...", "info");
     }
 });
 
@@ -132,6 +146,7 @@ function renderAll() {
 }
 
 function updateVitals() {
+    if (myPlayer.isAdmin) return;
     const vitals = ['health', 'hunger', 'thirst'];
     vitals.forEach(stat => {
         const val = myPlayer[stat];
@@ -139,9 +154,9 @@ function updateVitals() {
         const text = document.getElementById(`${stat}-val`);
         if (gauge && text) {
             // Dasharray is 176. Offset: 176 - (176 * val / 100)
-            const offset = 176 - (176 * val / 100);
+            const offset = 176 - (176 * (val || 0) / 100);
             gauge.style.strokeDashoffset = offset;
-            text.textContent = `${stat.charAt(0).toUpperCase() + stat.slice(1)} ${val}%`;
+            text.textContent = `${stat.charAt(0).toUpperCase() + stat.slice(1)} ${val || 0}%`;
         }
     });
 }
@@ -214,7 +229,18 @@ function renderInventory() {
 
     finishedList.innerHTML = '';
     Object.entries(myPlayer.inventory.finishedGoods).forEach(([item, qty]) => {
-        if (qty > 0) finishedList.appendChild(createItemCard(item, qty, 'blue'));
+        if (qty > 0) {
+            const card = createItemCard(item, qty, 'blue');
+            const btn = document.createElement('button');
+            btn.className = 'text-[9px] font-black uppercase tracking-widest text-blue-400 bg-white/5 px-2 py-1 rounded hover:bg-blue-500 hover:text-white transition-all w-full mt-1';
+            btn.textContent = 'Consume';
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                socket.emit('consume', { item });
+            };
+            card.appendChild(btn);
+            finishedList.appendChild(card);
+        }
     });
 
     purchasedList.innerHTML = '';
@@ -224,7 +250,10 @@ function renderInventory() {
             const btn = document.createElement('button');
             btn.className = 'text-[9px] font-black uppercase tracking-widest text-pink-400 bg-white/5 px-2 py-1 rounded hover:bg-pink-500 hover:text-white transition-all w-full mt-1';
             btn.textContent = 'Consume';
-            btn.onclick = () => socket.emit('consume', { item });
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                socket.emit('consume', { item });
+            };
             card.appendChild(btn);
             purchasedList.appendChild(card);
         }

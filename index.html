@@ -274,11 +274,13 @@
           <span class="material-symbols-rounded text-sm">timer</span>
           <span class="text-[10px] tracking-widest uppercase">Round starting...</span>
         </div>
-        <div class="px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center gap-2">
+        <div id="header-money-container"
+          class="px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center gap-2">
           <span class="material-symbols-rounded text-emerald-500">payments</span>
           <span id="header-money" class="font-bold text-emerald-500 text-sm md:text-lg">$0</span>
         </div>
-        <div id="status-container" class="px-3 py-1.5 bg-emerald-500 rounded-full flex items-center gap-1.5 shadow-lg shadow-emerald-500/20">
+        <div id="status-container"
+          class="px-3 py-1.5 bg-emerald-500 rounded-full flex items-center gap-1.5 shadow-lg shadow-emerald-500/20">
           <span id="player-status-badge" class="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
           <span class="text-[9px] font-black uppercase text-white tracking-widest" id="player-status-text">Alive</span>
         </div>
@@ -290,7 +292,7 @@
       <!-- Dashboard Tab -->
       <section id="dashboard" class="tab-pane active flex flex-1 p-4 gap-4 overflow-hidden">
         <!-- Sidebar: Business & Shop -->
-        <aside class="w-80 flex flex-col gap-4 overflow-y-auto pr-2 terminal-scroll">
+        <aside id="dashboard-sidebar" class="w-80 flex flex-col gap-4 overflow-y-auto pr-2 terminal-scroll">
           <section class="glass bg-card-dark rounded-2xl p-5 border border-white/10">
             <div class="flex justify-between items-start mb-4">
               <div>
@@ -317,7 +319,8 @@
         </aside>
 
         <!-- Main Dashboard: Inventory -->
-        <div class="flex-1 glass bg-card-dark rounded-2xl p-6 border border-white/10 overflow-y-auto terminal-scroll">
+        <div id="inventory-section"
+          class="flex-1 glass bg-card-dark rounded-2xl p-6 border border-white/10 overflow-y-auto terminal-scroll">
           <div class="flex items-center justify-between mb-8">
             <div>
               <h2 class="text-2xl font-black text-white">Player Inventory</h2>
@@ -351,7 +354,7 @@
 
         <!-- Right Sidebar: Stats & Chat -->
         <aside class="w-80 flex flex-col gap-4">
-          <section class="glass bg-card-dark rounded-2xl p-5 border border-white/10">
+          <section id="vitals-section" class="glass bg-card-dark rounded-2xl p-5 border border-white/10">
             <h2 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-6">Physical Condition</h2>
             <div class="flex justify-around items-center">
               <div class="flex flex-col items-center gap-2 group">

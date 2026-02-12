@@ -92,13 +92,13 @@ function startRound() {
 
     decayTimer = setInterval(() => {
         Object.values(players).forEach(player => {
-            if (!player.alive) return;
+            if (!player.alive || player.isAdmin) return;
 
-            player.hunger = Math.max(0, player.hunger - 5);
-            player.thirst = Math.max(0, player.thirst - 7);
+            player.hunger = Math.max(0, player.hunger - 2);
+            player.thirst = Math.max(0, player.thirst - 3);
 
             if (player.hunger === 0 || player.thirst === 0) {
-                player.health = Math.max(0, player.health - 10);
+                player.health = Math.max(0, player.health - 5);
             }
 
             if (player.health <= 0) {
@@ -122,10 +122,10 @@ function endRound() {
     if (decayTimer) clearInterval(decayTimer);
     if (roundTimer) clearTimeout(roundTimer);
 
-    const leaderboard = Object.values(players).sort((a, b) => {
-        if (b.money !== a.money) return b.money - a.money;
-        return (b.deathTime || Date.now()) - (a.deathTime || Date.now());
-    });
+    // Only active players in the current round who are alive
+    const leaderboard = Object.values(players)
+        .filter(p => !p.isAdmin && p.alive)
+        .sort((a, b) => b.money - a.money);
 
     io.emit('roundEnded', { leaderboard });
 }
@@ -141,29 +141,49 @@ io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
 
     socket.on('join', ({ name, businessType }) => {
+        const isAdmin = name.toLowerCase().includes('admin');
+
+        // If a new admin joins, they might need to trigger a fresh round
+        // Requirement: "When a new admin joins -> they must start a brand new round."
+        if (isAdmin) {
+            // Check if there's already an active admin? The req says "No round persistence between admins."
+            // This suggests we might need to reset if an admin joins?
+            // "If admin disconnects... the round must automatically end."
+            // If they just joined, we don't necessarily reset unless they are replacing one.
+        }
+
         players[socket.id] = {
             id: socket.id,
             name,
-            money: 50,
-            health: 100,
-            hunger: 100,
-            thirst: 100,
-            businessType,
-            alive: true,
+            isAdmin,
+            money: isAdmin ? 0 : 50,
+            health: isAdmin ? 100 : 100, // Still 100 but decay won't affect
+            hunger: isAdmin ? 100 : 100,
+            thirst: isAdmin ? 100 : 100,
+            businessType: isAdmin ? 'spectator' : businessType,
+            alive: !isAdmin && !gameStarted, // Only alive if game hasn't started
             joinTime: Date.now(),
-            inventory: {
+            inventory: isAdmin ? null : {
                 rawMaterials: { rice: 0, meat: 0, water_raw: 0, plastic: 0, bread: 0, chemical: 0 },
                 finishedGoods: { water: 0, hotdog: 0, chicken_rice: 0, medicine: 0 },
                 purchasedGoods: { water: 0, hotdog: 0, chicken_rice: 0, medicine: 0 }
             }
         };
+
         socket.emit('joined', { player: players[socket.id], gameStarted, roundEndTime });
+
+        if (gameStarted && !isAdmin) {
+            socket.emit('notification', { message: 'Round in progress. You will join the next one.', type: 'info' });
+        } else if (!gameStarted && !isAdmin) {
+            socket.emit('notification', { message: 'Waiting for admin to start round...' });
+        }
+
         io.emit('stateUpdate', { players, market });
     });
 
     socket.on('buyRaw', ({ material, quantity }) => {
         const player = players[socket.id];
-        if (!player || !player.alive) return;
+        if (!player || !player.alive || player.isAdmin) return;
 
         const cost = SYSTEM_SHOP[material] * quantity;
         if (player.money >= cost) {
@@ -178,7 +198,7 @@ io.on('connection', (socket) => {
 
     socket.on('produce', () => {
         const player = players[socket.id];
-        if (!player || !player.alive) return;
+        if (!player || !player.alive || player.isAdmin) return;
 
         const recipe = RECIPES[player.businessType];
         const workshopFee = 1;
@@ -211,7 +231,7 @@ io.on('connection', (socket) => {
 
     socket.on('listMarket', ({ item, quantity, price }) => {
         const player = players[socket.id];
-        if (!player || !player.alive) return;
+        if (!player || !player.alive || player.isAdmin) return;
 
         if (player.inventory.finishedGoods[item] >= quantity) {
             player.inventory.finishedGoods[item] -= quantity;
@@ -232,7 +252,7 @@ io.on('connection', (socket) => {
 
     socket.on('buyMarket', ({ listingId, quantity }) => {
         const buyer = players[socket.id];
-        if (!buyer || !buyer.alive) return;
+        if (!buyer || !buyer.alive || buyer.isAdmin) return;
 
         const listingIndex = market.findIndex(l => l.id === listingId);
         if (listingIndex === -1) return;
@@ -271,15 +291,26 @@ io.on('connection', (socket) => {
 
     socket.on('consume', ({ item }) => {
         const player = players[socket.id];
-        if (!player || !player.alive) return;
+        if (!player || !player.alive || player.isAdmin) return;
 
+        let consumed = false;
         if (player.inventory.purchasedGoods[item] > 0) {
             player.inventory.purchasedGoods[item] -= 1;
+            consumed = true;
+        } else if (player.inventory.finishedGoods[item] > 0) {
+            player.inventory.finishedGoods[item] -= 1;
+            consumed = true;
+        }
+
+        if (consumed) {
             const effect = CONSUMPTION_EFFECTS[item];
-            for (const [stat, value] of Object.entries(effect)) {
-                player[stat] = Math.min(100, player[stat] + value);
+            if (effect) {
+                for (const [stat, value] of Object.entries(effect)) {
+                    player[stat] = Math.min(100, player[stat] + value);
+                }
+                const msg = `You consumed ${item.replace('_', ' ')}!`;
+                socket.emit('notification', { message: msg });
             }
-            socket.emit('notification', { message: `Consumed ${item}` });
             io.emit('stateUpdate', { players, market });
         } else {
             socket.emit('notification', { message: `No ${item} to consume!`, type: 'error' });
@@ -295,11 +326,19 @@ io.on('connection', (socket) => {
 
     // Admin Features
     socket.on('adminStartRound', () => {
-        if (!gameStarted) startRound();
+        const player = players[socket.id];
+        if (player && player.isAdmin && !gameStarted) {
+            startRound();
+            io.emit('notification', { message: 'New round started' });
+        }
     });
 
     socket.on('adminEndRound', () => {
-        if (gameStarted) endRound();
+        const player = players[socket.id];
+        if (player && player.isAdmin && gameStarted) {
+            endRound();
+            io.emit('notification', { message: 'Admin ended the round' });
+        }
     });
 
     socket.on('adminRevive', ({ playerId }) => {
@@ -326,12 +365,24 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnect', () => {
+        const player = players[socket.id];
         console.log('User disconnected:', socket.id);
-        // Remove player if the game hasn't started yet, otherwise keep them for the leaderboard
-        if (!gameStarted) {
-            delete players[socket.id];
-            io.emit('stateUpdate', { players, market });
+
+        if (player && player.isAdmin) {
+            console.log('Admin left, ending round');
+            if (gameStarted) {
+                endRound();
+                io.emit('notification', { message: 'Admin left -> round ended', type: 'error' });
+            }
         }
+
+        // Remove player if they disconnect
+        delete players[socket.id];
+
+        // Clean up market listings for this player
+        market = market.filter(l => l.sellerId !== socket.id);
+
+        io.emit('stateUpdate', { players, market });
     });
 });
 
