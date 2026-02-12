@@ -1,8 +1,7 @@
 import { io } from "socket.io-client";
 
-const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
-const PRODUCTION_SERVER_URL = "https://your-server-name.onrender.com"; // Replace this later!
-const socket = io(isLocal ? `${window.location.protocol}//${window.location.hostname}:3000` : PRODUCTION_SERVER_URL);
+const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+const socket = io(isLocal ? "http://localhost:5000" : "https://shivi-ox1d.onrender.com");
 
 socket.on("connect", () => {
     console.log("Connected to server with ID:", socket.id);
