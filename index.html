@@ -278,7 +278,7 @@
           <span class="material-symbols-rounded text-emerald-500">payments</span>
           <span id="header-money" class="font-bold text-emerald-500 text-sm md:text-lg">$0</span>
         </div>
-        <div class="px-3 py-1.5 bg-emerald-500 rounded-full flex items-center gap-1.5 shadow-lg shadow-emerald-500/20">
+        <div id="status-container" class="px-3 py-1.5 bg-emerald-500 rounded-full flex items-center gap-1.5 shadow-lg shadow-emerald-500/20">
           <span id="player-status-badge" class="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
           <span class="text-[9px] font-black uppercase text-white tracking-widest" id="player-status-text">Alive</span>
         </div>
@@ -597,7 +597,7 @@
       p.style.width = size;
       p.style.height = size;
       p.style.left = Math.random() * 100 + '%';
-      p.style.top = Math.random() * 100 + 100 + '%';
+      p.style.top = Math.random() * 100 + '%';
       p.style.animationDuration = Math.random() * 10 + 10 + 's';
       p.style.animationDelay = Math.random() * 10 + 's';
       particleContainer.appendChild(p);

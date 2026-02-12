@@ -104,9 +104,15 @@ function renderAll() {
 
     // Header & Global Stats
     document.getElementById('header-money').textContent = `$${myPlayer.money.toLocaleString()}`;
-    const statusText = document.getElementById('player-status-text');
-    statusText.textContent = myPlayer.alive ? 'ALIVE' : 'DEAD';
+    document.getElementById('player-status-text').textContent = myPlayer.alive ? 'ALIVE' : 'DEAD';
     document.getElementById('player-status-badge').className = myPlayer.alive ? 'w-2 h-2 rounded-full bg-white animate-ping' : 'w-2 h-2 rounded-full bg-slate-400';
+
+    const statusContainer = document.getElementById('status-container');
+    if (statusContainer) {
+        statusContainer.className = myPlayer.alive
+            ? 'px-3 py-1.5 bg-emerald-500 rounded-full flex items-center gap-1.5 shadow-lg shadow-emerald-500/20'
+            : 'px-3 py-1.5 bg-slate-700 rounded-full flex items-center gap-1.5 shadow-lg';
+    }
 
     document.getElementById('active-players-count').textContent = Object.keys(allPlayers).length;
     const totalMoney = Object.values(allPlayers).reduce((sum, p) => sum + p.money, 0);
@@ -358,6 +364,7 @@ let timerInterval = null;
 function startTimer(endTime) {
     if (timerInterval) clearInterval(timerInterval);
     const display = document.getElementById('round-timer');
+    display.classList.remove('hidden');
 
     timerInterval = setInterval(() => {
         const remaining = endTime - Date.now();

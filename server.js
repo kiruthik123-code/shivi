@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
@@ -50,16 +51,30 @@ let roundTimer = null;
 let decayTimer = null;
 
 function resetGameState() {
-    players = {};
+    Object.values(players).forEach(player => {
+        player.money = 50;
+        player.health = 100;
+        player.hunger = 100;
+        player.thirst = 100;
+        player.alive = true;
+        player.deathTime = null;
+        player.inventory = {
+            rawMaterials: { rice: 0, meat: 0, water_raw: 0, plastic: 0, bread: 0, chemical: 0 },
+            finishedGoods: { water: 0, hotdog: 0, chicken_rice: 0, medicine: 0 },
+            purchasedGoods: { water: 0, hotdog: 0, chicken_rice: 0, medicine: 0 }
+        };
+    });
     market = [];
     tradeLogs = [];
     gameStarted = false;
     roundEndTime = null;
     if (roundTimer) clearTimeout(roundTimer);
     if (decayTimer) clearInterval(decayTimer);
+    io.emit('stateUpdate', { players, market });
 }
 
 function startRound() {
+    resetGameState();
     gameStarted = true;
     roundEndTime = Date.now() + ROUND_DURATION;
 
@@ -302,22 +317,28 @@ io.on('connection', (socket) => {
 
     socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);
-        // In a real game, we might keep the player for a while
-        // but for MVP, let's keep them in the players object until round ends
+        // Remove player if the game hasn't started yet, otherwise keep them for the leaderboard
+        if (!gameStarted) {
+            delete players[socket.id];
+            io.emit('stateUpdate', { players, market });
+        }
     });
 });
 
 const PORT = process.env.PORT || 3000;
-// Support both local development and Vercel/Production environments
-if (!process.env.VERCEL && process.env.NODE_ENV !== 'production') {
-    server.listen(PORT, () => {
-        console.log(`Server running on port ${PORT}`);
-    });
-} else if (!process.env.VERCEL) {
-    // Fallback for other production environments that aren't Vercel
+
+if (!process.env.VERCEL) {
     server.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
     });
 }
 
 export default server;
+const path = require("path");
+
+app.use(express.static(path.join(__dirname, "dist")));
+
+app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "dist", "index.html"));
+});
+
