@@ -17,6 +17,7 @@ let myPlayer = null;
 let allPlayers = {};
 let market = [];
 let gameStarted = false;
+let hasAnalyticsUpdate = true;
 
 // DOM Elements
 const loginScreen = document.getElementById('login-screen');
@@ -203,6 +204,7 @@ socket.on('notification', ({ message, type }) => {
 
 // Game State Updates
 socket.on('stateUpdate', ({ players, market: serverMarket }) => {
+    hasAnalyticsUpdate = true;
     allPlayers = players;
     market = serverMarket;
     myPlayer = players[socket.id] || myPlayer;
@@ -831,12 +833,15 @@ socket.on('tradeOccurred', (trade) => {
     // Track for charts
     if (Object.prototype.hasOwnProperty.call(accumulatedTradeCounts, trade.item)) {
         accumulatedTradeCounts[trade.item] += trade.quantity;
+        hasAnalyticsUpdate = true;
     }
 });
 
 // Update chart history every 2 seconds
 setInterval(() => {
     if (!myPlayer?.isAdmin) return; // Only process for admin
+    if (!hasAnalyticsUpdate) return;
+
 
     // Calculate Global Supply (Market + Players)
     let totalSupply = 0;
@@ -883,6 +888,8 @@ setInterval(() => {
         const priceDisplay = document.getElementById(`${item}-price-display`);
         if (priceDisplay) priceDisplay.textContent = `$${avgPrice.toFixed(2)}`;
     });
+
+    hasAnalyticsUpdate = false;
 
 }, 2000);
 
